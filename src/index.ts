@@ -8,6 +8,13 @@ function isFile(value: any): value is File {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
+      // 授权验证
+      const authHeader = request.headers.get('Authorization');
+      const expectedToken = `Bearer ${env.AUTH_TOKEN}`;
+      if (!authHeader || authHeader !== expectedToken) {
+        return new Response('Unauthorized', { status: 401 });
+      }
+
       if (request.method !== 'POST') {
         return new Response('Expected POST request', { status: 405 });
       }
@@ -130,4 +137,5 @@ function correctTermsByPinyin(text: string, correctTermsJson: string | undefined
 interface Env {
   AI: any;
   CORRECT_TERMS: string;
+  AUTH_TOKEN: string;
 }

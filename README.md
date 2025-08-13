@@ -6,6 +6,7 @@
 
 ## 核心功能
 
+- **API 授权**: 通过 Bearer Token 保护您的 API，确保只有授权用户才能访问。
 - **语音转文本**: 基于 Cloudflare AI 的 Whisper 模型进行高效的语音识别。
 - **繁简转换**: 自动将识别出的繁体中文转换为简体中文。
 - **智能拼音修正**:
@@ -25,6 +26,25 @@
 
 这个方法可以有效地修正同音或近音的识别错误，且无需您预知所有可能的错词。
 
+## API 使用与授权
+
+为了保护您的 API 不被滥用，所有请求都需要进行授权验证。
+
+### 如何调用 API
+
+您需要通过 `POST` 请求调用 API，并在请求头中提供 `Authorization` 信息。
+
+**请求示例 (使用 cURL):**
+
+```bash
+curl -X POST \
+  --url https://your-worker-name.your-subdomain.workers.dev \
+  --header 'Authorization: Bearer sk-willpan' \
+  --form 'audio=@/path/to/your/audio/file.m4a'
+```
+
+请将 `your-worker-name.your-subdomain.workers.dev` 替换为您的 Worker 的实际 URL，并将 `/path/to/your/audio/file.m4a` 替换为您的音频文件的路径。
+
 ### 如何配置环境变量
 
 您可以在 Cloudflare 的仪表盘中轻松更新您的标准术语库。
@@ -34,11 +54,17 @@
 3.  进入 "Settings" -> "Variables"。
 4.  在 "Environment Variables" 部分，点击 "Add variable"。
 5.  设置以下变量：
-    -   **Variable name**: `CORRECT_TERMS`
-    -   **Value**: 一个包含您所有标准术语的 JSON 数组字符串。例如：
-        ```json
-        [
-          "引体向上",
+
+    -   **`AUTH_TOKEN`**: 用于 API 授权的密钥。
+        -   **Variable name**: `AUTH_TOKEN`
+        -   **Value**: `sk-willpan` (或您希望使用的任何其他密钥)
+
+    -   **`CORRECT_TERMS`**: 用于智能修正的标准术语列表。
+        -   **Variable name**: `CORRECT_TERMS`
+        -   **Value**: 一个包含您所有标准术语的 JSON 数组字符串。例如：
+            ```json
+            [
+              "引体向上",
           "负重",
           "俯卧撑",
           "杠铃卧推",
