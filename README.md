@@ -47,19 +47,23 @@ curl -X POST \
 
 ### 如何配置环境变量
 
-您可以在 Cloudflare 的仪表盘中轻松更新您的标准术语库。
+您可以在 Cloudflare 的仪表盘中轻松更新您的配置。
 
 1.  登录到您的 Cloudflare 账户。
 2.  导航到 "Workers & Pages"，然后选择您的 `voice-to-text-api` Worker。
 3.  进入 "Settings" -> "Variables"。
-4.  在 "Environment Variables" 部分，点击 "Add variable"。
-5.  设置以下变量：
+4.  在 "Environment Variables" 部分，点击 "Add variable" 来添加或修改变量。
 
-    -   **`AUTH_TOKEN`**: 用于 API 授权的密钥。
-        -   **Variable name**: `AUTH_TOKEN`
-        -   **Value**: `sk-willpan` (或您希望使用的任何其他密钥)
+#### 必要配置
 
-    -   **`CORRECT_TERMS`**: 用于智能修正的标准术语列表。
+-   **`AUTH_TOKEN` (安全密钥)**
+    -   **Variable name**: `AUTH_TOKEN`
+    -   **Value**: `sk-willpan` (或您希望使用的任何其他高强度密钥)
+    -   **重要**: 为了安全，请点击 "Encrypt" 按钮对您的密钥进行加密。**切勿**将此密钥保存在 `wrangler.toml` 或任何公共代码库中。
+
+#### 可选配置
+
+-   **`CORRECT_TERMS` (智能修正术语库)**
         -   **Variable name**: `CORRECT_TERMS`
         -   **Value**: 一个包含您所有标准术语的 JSON 数组字符串。例如：
             ```json
