@@ -39,7 +39,7 @@
 ```bash
 curl -X POST \
   --url https://your-worker-name.your-subdomain.workers.dev \
-  --header 'Authorization: Bearer sk-willpan' \
+  --header 'Authorization: Bearer your-secret-token' \
   --form 'audio=@/path/to/your/audio/file.m4a'
 ```
 
@@ -58,7 +58,7 @@ curl -X POST \
 
 -   **`AUTH_TOKEN` (安全密钥)**
     -   **Variable name**: `AUTH_TOKEN`
-    -   **Value**: `sk-willpan` (或您希望使用的任何其他高强度密钥)
+    -   **Value**: `your-secret-token` (或您希望使用的任何其他高强度密钥)
     -   **重要**: 为了安全，请点击 "Encrypt" 按钮对您的密钥进行加密。**切勿**将此密钥保存在 `wrangler.toml` 或任何公共代码库中。
 
 #### 可选配置
