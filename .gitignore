@@ -3,3 +3,6 @@
 
 # Wrangler
 .wrangler/
+
+# Media files
+*.m4a
