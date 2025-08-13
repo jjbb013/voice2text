@@ -1,4 +1,4 @@
-name = "voice-to-text-api"
+name = "voice2text"
 main = "src/index.ts"
 compatibility_date = "2024-05-12"
 
