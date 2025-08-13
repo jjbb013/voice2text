@@ -29,7 +29,9 @@ export default {
       );
 
       if (response.text) {
-        response.text = toSimplified(response.text);
+        let correctedText = toSimplified(response.text);
+        correctedText = correctSportsTerms(correctedText);
+        response.text = correctedText;
       }
 
       return new Response(JSON.stringify(response), {
@@ -73,6 +75,22 @@ function toSimplified(traditionalText: string): string {
     simplifiedText = simplifiedText.replace(new RegExp(traditional, 'g'), simplified);
   }
   return simplifiedText;
+}
+
+function correctSportsTerms(text: string): string {
+  const corrections: { [key: string]: string } = {
+    '饮体向上': '引体向上',
+    '俯卧撑': '俯卧撑', // 确保正确的词也被覆盖，以防万一
+    '杠铃卧推': '杠铃卧推',
+    '哑铃卧推': '哑铃卧推',
+    // 在这里可以添加更多常见的错误识别和对应的正确术语
+  };
+
+  let correctedText = text;
+  for (const [wrong, correct] of Object.entries(corrections)) {
+    correctedText = correctedText.replace(new RegExp(wrong, 'g'), correct);
+  }
+  return correctedText;
 }
 
 interface Env {
