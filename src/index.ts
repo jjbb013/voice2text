@@ -1,4 +1,5 @@
 import type { ExecutionContext } from '@cloudflare/workers-types';
+import { pinyin } from 'pinyin';
 
 function isFile(value: any): value is File {
   return value instanceof (globalThis as any).File;
@@ -30,7 +31,7 @@ export default {
 
       if (response.text) {
         let correctedText = toSimplified(response.text);
-        correctedText = correctSportsTerms(correctedText);
+        correctedText = correctTermsByPinyin(correctedText, env.CORRECT_TERMS);
         response.text = correctedText;
       }
 
@@ -77,22 +78,56 @@ function toSimplified(traditionalText: string): string {
   return simplifiedText;
 }
 
-function correctSportsTerms(text: string): string {
-  const corrections: { [key: string]: string } = {
-    '饮体向上': '引体向上',
-    '俯卧撑': '俯卧撑', // 确保正确的词也被覆盖，以防万一
-    '杠铃卧推': '杠铃卧推',
-    '哑铃卧推': '哑铃卧推',
-    // 在这里可以添加更多常见的错误识别和对应的正确术语
-  };
-
-  let correctedText = text;
-  for (const [wrong, correct] of Object.entries(corrections)) {
-    correctedText = correctedText.replace(new RegExp(wrong, 'g'), correct);
+function correctTermsByPinyin(text: string, correctTermsJson: string | undefined): string {
+  if (!correctTermsJson) {
+    return text;
   }
-  return correctedText;
+
+  try {
+    const correctTerms: string[] = JSON.parse(correctTermsJson);
+    let correctedText = text;
+
+    // 为了效率，先将正确术语按长度分组
+    const termsByLength: { [key: number]: string[] } = {};
+    for (const term of correctTerms) {
+      const len = term.length;
+      if (!termsByLength[len]) {
+        termsByLength[len] = [];
+      }
+      termsByLength[len].push(term);
+    }
+
+    // 遍历文本，进行滑动窗口匹配
+    for (let i = 0; i < correctedText.length; i++) {
+      for (const len in termsByLength) {
+        const length = parseInt(len, 10);
+        if (i + length > correctedText.length) {
+          continue;
+        }
+
+        const segment = correctedText.substring(i, i + length);
+        const segmentPinyin = pinyin(segment, { style: 'normal' }).join('');
+
+        for (const correctTerm of termsByLength[length]) {
+          const correctTermPinyin = pinyin(correctTerm, { style: 'normal' }).join('');
+          if (segmentPinyin === correctTermPinyin) {
+            // 拼音匹配成功，进行替换
+            correctedText = correctedText.substring(0, i) + correctTerm + correctedText.substring(i + length);
+            // 替换后，跳过已替换的部分
+            i += length - 1;
+            break; 
+          }
+        }
+      }
+    }
+    return correctedText;
+  } catch (e) {
+    console.error("Failed to parse CORRECT_TERMS JSON from environment variable:", e);
+    return text; // 如果解析失败，返回原始文本
+  }
 }
 
 interface Env {
   AI: any;
+  CORRECT_TERMS: string;
 }
